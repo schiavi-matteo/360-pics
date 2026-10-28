@@ -29,20 +29,32 @@
 <script>
 pannellum.viewer('panorama', {
     "default": {
-        "firstScene": "smallab",
+        "firstScene": "smallab_center",
         "sceneFadeDuration": 1000,
         "autoLoad": true,
         //"hotSpotDebug": true
     },
 
     "scenes": {
-        "smallab": {
+        "smallab_center": {
             "type": "equirectangular",
             "panorama": "https://schiavi-matteo.github.io/360-pics/images/CPL/smallab_center.jpg", 
             "hfov": 110,
             "pitch": 0.36,
             "yaw": -11,
             "hotSpots": [
+                { // Lato sx
+                    "pitch": -2,
+                    "yaw": -92, 
+                    "type": "scene",
+                    "sceneId": "smallab_left_side"
+                },
+                { // Lato dx
+                    "pitch": -2,
+                    "yaw": 80, 
+                    "type": "scene",
+                    "sceneId": "smallab_right_side"
+                },
                 { // Porta dx
                     "pitch": -1,
                     "yaw": 12.5, 
@@ -112,6 +124,38 @@ pannellum.viewer('panorama', {
             ]
         },
 
+        "smallab_left_side": {
+            "type": "equirectangular",
+            "panorama": "https://schiavi-matteo.github.io/360-pics/images/CPL/smallab_left_side.jpg", 
+            "hfov": 110,
+            "pitch": -2,
+            "yaw": -92,
+            "hotSpots": [
+                {
+                    "pitch": -7.27,
+                    "yaw": 95.54, 
+                    "type": "scene",
+                    "sceneId": "smallab_center"
+                }
+            ]
+        },
+
+        "smallab_right_side": {
+            "type": "equirectangular",
+            "panorama": "https://schiavi-matteo.github.io/360-pics/images/CPL/smallab_right_side.jpg", 
+            "hfov": 110,
+            "pitch": -2,
+            "yaw": 80,
+            "hotSpots": [
+                {
+                    "pitch": -4,
+                    "yaw": -102, 
+                    "type": "scene",
+                    "sceneId": "smallab_center"
+                }
+            ]
+        },
+
         "a18": {
             "type": "equirectangular",
             "panorama": "https://schiavi-matteo.github.io/360-pics/images/CPL/a18.jpg", 
@@ -122,14 +166,14 @@ pannellum.viewer('panorama', {
                     "yaw": -36.8, 
                     "type": "scene",
                     "text": "Vai in Laboratorio Informatico Piccolo",
-                    "sceneId": "smallab"
+                    "sceneId": "smallab_center"
                 },
                 {
                     "pitch": 0.4,
                     "yaw": 38.3, 
                     "type": "scene",
                     "text": "Vai in Laboratorio Informatico Piccolo",
-                    "sceneId": "smallab"
+                    "sceneId": "smallab_center"
                 }
             ]
         }
