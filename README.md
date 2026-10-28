@@ -15,11 +15,11 @@ Panoramas can be viewed:
 
 ## Example: add this block to your HTML page
 ```
-<iframe 
-    width="1000" 
-    height="500" 
-    src="[https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.htm#panorama=https://schiavi-matteo.github.io/360-pics/images/studio.jpg&autoLoad=true](https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.htm#panorama=https://schiavi-matteo.github.io/360-pics/images/studio.jpg&autoLoad=true)" 
-    style="border-style: none;" 
-    allowfullscreen>
+<iframe
+    width="1000"
+    height="500"
+    src="https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.htm#panorama=https://schiavi-matteo.github.io/360-pics/images/studio.jpg&amp;autoLoad=true"
+    style="border-style: none; display: table; margin-left: auto; margin-right: auto;"
+    sandbox="">
 </iframe>
 ```
