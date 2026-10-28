@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Virtuale Smallab - A18</title>
+    
+    <link rel="stylesheet" href="https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.css"/>
+    <script type="text/javascript" src="https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.js"></script>
+    
+    <style>
+        body, html {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+        #panorama {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="panorama"></div>
+
+<script>
+pannellum.viewer('panorama', {
+    "default": {
+        "firstScene": "smallab",
+        "sceneFadeDuration": 1000,
+        "autoLoad": true,
+        //"hotSpotDebug": true
+    },
+
+    "scenes": {
+        "smallab": {
+            "type": "equirectangular",
+            "panorama": "https://schiavi-matteo.github.io/360-pics/images/CPL/smallab_center.jpg", 
+            "hfov": 110,
+            "pitch": 0.36,
+            "yaw": -11,
+            "hotSpots": [
+                { // Porta dx
+                    "pitch": -1,
+                    "yaw": 12.5, 
+                    "type": "scene",
+                    "text": "Vai in Aula 18",
+                    "sceneId": "a18"
+                },
+                { // Porta centrale
+                    "pitch": -1,
+                    "yaw": -12.5, 
+                    "type": "scene",
+                    "text": "Vai in Aula 18",
+                    "sceneId": "a18"
+                },
+                { // Porta sx
+                    "pitch": 1,
+                    "yaw": -66.2, 
+                    "type": "scene",
+                    "text": "Vai in Aula 18",
+                    "sceneId": "a18"
+                },
+                { // Postazione Docente
+                    "pitch": -4.3,
+                    "yaw": -57,
+                    "type": "info",
+                    "text": "Postazione Docente"
+                },
+                { // Proiettore principale
+                    "pitch": 12,
+                    "yaw": -43,
+                    "type": "info",
+                    "text": "Proiettore principale",
+                    "URL": "https://www.epson.it/it_IT/prodotti/projector/ottica-ultra-corta/eb-685wi-ultra-short-throw-projector/p/56882"
+                },
+                { // Proiettore secondario
+                    "pitch": 8,
+                    "yaw": 40.7,
+                    "type": "info",
+                    "text": "Proiettore secondario",
+                    "URL": "https://www.epson.it/it_IT/prodotti/projector/ottica-ultra-corta/eb-685wi-ultra-short-throw-projector/p/56882"
+                },
+                { // Stampante
+                    "pitch": -5,
+                    "yaw": 45.5,
+                    "type": "info",
+                    "text": "Stampante",
+                    "URL": "https://support.brother.com/g/b/downloadlist.aspx?c=it&lang=it&prod=hll6415dn_eu&os=10068"
+                },
+                { // Armadio dati principale
+                    "pitch": -4,
+                    "yaw": 49.7,
+                    "type": "info",
+                    "text": "Armadio dati principale"
+                },
+                { // Armadio dati secondario
+                    "pitch": -2,
+                    "yaw": -120,
+                    "type": "info",
+                    "text": "Armadio dati secondario"
+                },
+                { // Estintore
+                    "pitch": -0.4,
+                    "yaw": 23.8,
+                    "type": "info",
+                    "text": "Estintore"
+                }
+            ]
+        },
+
+        "a18": {
+            "type": "equirectangular",
+            "panorama": "https://schiavi-matteo.github.io/360-pics/images/CPL/a18.jpg", 
+            "hfov": 110,
+            "hotSpots": [
+                {
+                    "pitch": 0.2,
+                    "yaw": -36.8, 
+                    "type": "scene",
+                    "text": "Vai in Laboratorio Informatico Piccolo",
+                    "sceneId": "smallab"
+                },
+                {
+                    "pitch": 0.4,
+                    "yaw": 38.3, 
+                    "type": "scene",
+                    "text": "Vai in Laboratorio Informatico Piccolo",
+                    "sceneId": "smallab"
+                }
+            ]
+        }
+    }
+});
+</script>
+
+</body>
+</html>
