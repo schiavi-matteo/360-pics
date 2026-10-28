@@ -12,3 +12,14 @@ Panoramas can be viewed:
 ## Credits & License
 - **Pannellum**: The 360° panorama viewer is developed by Matthew Petroff and licensed under the MIT License. Full terms can be found in the `COPYING` file.
 - **Photographic Material**: © Università degli Studi di Ferrara. All rights reserved. Unauthorized reproduction or redistribution is prohibited.
+
+## Example: add this block to your HTML page
+```
+<iframe 
+    width="1000" 
+    height="500" 
+    src="[https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.htm#panorama=https://schiavi-matteo.github.io/360-pics/images/studio.jpg&autoLoad=true](https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.htm#panorama=https://schiavi-matteo.github.io/360-pics/images/studio.jpg&autoLoad=true)" 
+    style="border-style: none;" 
+    allowfullscreen>
+</iframe>
+```
