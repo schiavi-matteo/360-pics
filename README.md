@@ -25,4 +25,4 @@ Panoramas can be viewed:
 ```
 
 ## Test your 360° pictures
-If you need to check how your 360° pictures behave, you can use this [Local Viewer](https://schiavi-matteo.github.io/360-pics/local-test-viewer.html){:target="_blank"} to try out the pics locally before uploading them.
+If you need to check how your 360° pictures behave, you can use this [Local Viewer](https://schiavi-matteo.github.io/360-pics/local-test-viewer.html){:target="_blank" rel="noopener"} to try out the pics locally before uploading them.
