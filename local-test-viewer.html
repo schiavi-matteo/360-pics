@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Locale 360° — Pannellum Viewer</title>
+
+  <!-- Libreria Pannellum caricata dagli URL richiesti -->
+  <link rel="stylesheet" href="https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.css"/>
+  <script type="text/javascript" src="https://schiavi-matteo.github.io/360-pics/pannellum/pannellum.js"></script>
+
+  <style>
+    /* Reset e variabili tema scuro moderno */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-surface: rgba(16, 20, 29, 0.84);
+      --bg-surface-solid: #111622;
+      --bg-elevated: rgba(255, 255, 255, 0.06);
+      --bg-elevated-hover: rgba(255, 255, 255, 0.11);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-focus: rgba(99, 102, 241, 0.65);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --success-bg: rgba(16, 185, 129, 0.15);
+      --success-border: rgba(16, 185, 129, 0.4);
+      --success-text: #34d399;
+      --warn-bg: rgba(245, 158, 11, 0.15);
+      --warn-border: rgba(245, 158, 11, 0.4);
+      --warn-text: #fbbf24;
+      --error-bg: rgba(239, 68, 68, 0.18);
+      --error-border: rgba(239, 68, 68, 0.45);
+      --error-text: #f87171;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 8px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.55);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Contenitore Pannellum a pieno schermo */
+    #panorama {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-dark);
+      z-index: 1;
+    }
+
+    /* Input file nascosto */
+    #file-input {
+      display: none;
+    }
+
+    /* Schermata iniziale (Landing) */
+    #landing-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.14), transparent 45%),
+        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.08), transparent 45%),
+        var(--bg-dark);
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    #landing-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .landing-card {
+      width: 100%;
+      max-width: 520px;
+      background: rgba(17, 22, 34, 0.9);
+      border: 1px solid var(--border-subtle);
+      border-radius: 22px;
+      padding: 36px 28px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .landing-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(99, 102, 241, 0.05));
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #818cf8;
+    }
+
+    .landing-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .landing-subtitle {
+      font-size: 0.94rem;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      margin-bottom: 26px;
+    }
+
+    .dropzone-box {
+      border: 2px dashed rgba(148, 163, 184, 0.28);
+      border-radius: var(--radius-lg);
+      padding: 28px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .dropzone-box:hover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.06);
+    }
+
+    .dropzone-text {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .dropzone-hint {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* Pulsanti */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 11px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-elevated-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-sm {
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .landing-footer {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* Overlay globale per Drag & Drop */
+    #drop-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(10, 13, 20, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    #drop-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .drop-overlay-inner {
+      width: 100%;
+      max-width: 460px;
+      padding: 44px 28px;
+      border-radius: 24px;
+      border: 2px dashed var(--accent);
+      background: rgba(17, 22, 34, 0.92);
+      text-align: center;
+      box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.12), var(--shadow-lg);
+      transform: scale(0.96);
+      transition: transform 0.2s ease;
+    }
+
+    #drop-overlay.active .drop-overlay-inner {
+      transform: scale(1);
+    }
+
+    .drop-overlay-inner h2 {
+      font-size: 1.25rem;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    .drop-overlay-inner p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    /* Pulsante flottante per aprire il pannello quando è chiuso */
+    #panel-toggle-open {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    #panel-toggle-open:hover {
+      background: rgba(25, 31, 46, 0.95);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    #panel-toggle-open.visible {
+      display: inline-flex;
+    }
+
+    /* Pannello di controllo flottante in alto a destra */
+    #control-panel {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 35;
+      width: 320px;
+      max-width: calc(100vw - 28px);
+      max-height: calc(100vh - 28px);
+      overflow-y: auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-lg);
+      display: none;
+      flex-direction: column;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    #control-panel.visible {
+      display: flex;
+    }
+
+    #control-panel.collapsed {
+      display: none;
+    }
+
+    /* Scrollbar discreta per il pannello */
+    #control-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    #control-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #control-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .panel-title-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .panel-body {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* Card info file */
+    .file-info-box {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+    }
+
+    .badge-success {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: var(--success-text);
+    }
+
+    .badge-warn {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+      color: var(--warn-text);
+    }
+
+    .ratio-note {
+      font-size: 0.75rem;
+      line-height: 1.4;
+      color: var(--warn-text);
+      display: none;
+    }
+
+    .ratio-note.visible {
+      display: block;
+    }
+
+    /* Telemetria Yaw / Pitch / HFOV */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .telemetry-item {
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 6px;
+      text-align: center;
+    }
+
+    .telemetry-key {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .telemetry-val {
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Controlli e switch */
+    .settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .setting-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .setting-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .setting-desc {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+    }
+
+    /* Toggle switch CSS */
+    .switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .switch-slider::before {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: #ffffff;
+      transition: transform 0.2s ease;
+    }
+
+    .switch input:checked + .switch-slider {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .switch input:checked + .switch-slider::before {
+      transform: translateX(18px);
+    }
+
+    /* Slider velocità auto-rotazione */
+    .slider-wrap {
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: opacity 0.2s ease;
+    }
+
+    .slider-wrap.disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .slider-value {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    /* Toast di notifica */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      z-index: 120;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(17, 22, 34, 0.95);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+    }
+
+    #toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #toast.toast-success {
+      border-color: var(--success-border);
+      color: var(--success-text);
+    }
+
+    #toast.toast-error {
+      border-color: var(--error-border);
+      color: var(--error-text);
+    }
+
+    /* Adattamenti mobile */
+    @media (max-width: 640px) {
+      .landing-card {
+        padding: 28px 20px;
+      }
+      #control-panel {
+        top: 10px;
+        right: 10px;
+        width: calc(100vw - 20px);
+        max-height: calc(100vh - 20px);
+      }
+      #panel-toggle-open {
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Contenitore del viewer Pannellum (100vw x 100vh) -->
+  <div id="panorama"></div>
+
+  <!-- Input file nascosto per la selezione da disco -->
+  <input type="file" id="file-input" accept="image/*">
+
+  <!-- Schermata iniziale con Drag & Drop -->
+  <main id="landing-screen">
+    <section class="landing-card">
+      <div class="landing-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <ellipse cx="12" cy="12" rx="10" ry="4"></ellipse>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+      </div>
+      <h1 class="landing-title">Anteprima Locale 360°</h1>
+      <p class="landing-subtitle">
+        Testa le tue foto panoramiche equirettangolari con Pannellum direttamente dal tuo dispositivo, senza server locale e senza problemi CORS.
+      </p>
+
+      <div class="dropzone-box" id="landing-dropzone" role="button" tabindex="0" aria-label="Area per trascinare o selezionare un'immagine 360 gradi">
+        <div class="dropzone-text">Trascina qui una foto panoramica 360°</div>
+        <div class="dropzone-hint">Formati supportati: JPG, PNG, WebP (consigliato 2:1)</div>
+        <button type="button" class="btn btn-primary" id="landing-select-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Seleziona immagine 360°
+        </button>
+      </div>
+
+      <p class="landing-footer">
+        Le immagini restano in locale nel browser tramite Blob URL e non vengono caricate su alcun server.
+      </p>
+    </section>
+  </main>
+
+  <!-- Overlay Drag & Drop sull'intera pagina -->
+  <div id="drop-overlay" aria-hidden="true">
+    <div class="drop-overlay-inner">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      <h2>Rilascia l'immagine 360°</h2>
+      <p>Verrà caricata subito nel visualizzatore Pannellum</p>
+    </div>
+  </div>
+
+  <!-- Pulsante per riaprire il pannello di controllo quando è ridotto -->
+  <button type="button" id="panel-toggle-open" aria-label="Apri pannello di controllo">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+    Controlli
+  </button>
+
+  <!-- Pannello di controllo flottante -->
+  <aside id="control-panel" aria-label="Pannello di controllo 360">
+    <div class="panel-header">
+      <div class="panel-title-wrap">
+        <span class="panel-title-dot"></span>
+        <span>Controlli 360°</span>
+      </div>
+      <button type="button" class="icon-btn" id="panel-toggle-close" title="Nascondi pannello" aria-label="Nascondi pannello">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <div class="panel-body">
+      <!-- Sezione File -->
+      <div>
+        <button type="button" class="btn btn-primary btn-sm btn-full" id="panel-select-btn" style="margin-bottom: 10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Carica nuova immagine
+        </button>
+
+        <div class="file-info-box">
+          <div class="file-name" id="info-filename" title="">—</div>
+          <div class="badge-row">
+            <span class="badge" id="info-resolution">— × —</span>
+            <span class="badge" id="info-ratio">—</span>
+          </div>
+          <div class="ratio-note" id="ratio-warning">
+            Attenzione: l'aspect ratio non è 2:1. L'immagine potrebbe apparire leggermente distorta in proiezione equirettangolare.
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Sezione Telemetria Camera -->
+      <div>
+        <div class="section-label">Vista Camera (Tempo Reale)</div>
+        <div class="telemetry-grid">
+          <div class="telemetry-item">
+            <div class="telemetry-key">Yaw</div>
+            <div class="telemetry-val" id="val-yaw">0.0°</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-key">Pitch</div>
+            <div class="telemetry-val" id="val-pitch">0.0°</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-key">HFOV</div>
+            <div class="telemetry-val" id="val-hfov">100.0°</div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary btn-sm btn-full" id="btn-copy-json">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copia vista (JSON)
+        </button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Sezione Impostazioni Rapide -->
+      <div>
+        <div class="section-label">Impostazioni Viewer</div>
+        <div class="settings-list">
+          <!-- Auto-rotazione -->
+          <label class="setting-row">
+            <span class="setting-text">
+              <span class="setting-title">Auto-rotazione</span>
+              <span class="setting-desc">Ruota automaticamente la camera</span>
+            </span>
+            <span class="switch">
+              <input type="checkbox" id="opt-autorotate">
+              <span class="switch-slider"></span>
+            </span>
+          </label>
+
+          <!-- Slider velocità auto-rotazione -->
+          <div class="slider-wrap disabled" id="autorotate-speed-wrap">
+            <div class="slider-header">
+              <span>Velocità rotazione</span>
+              <span class="slider-value" id="opt-speed-val">-2.0 °/s</span>
+            </div>
+            <input type="range" id="opt-autorotate-speed" min="-15" max="15" step="0.5" value="-2">
+          </div>
+
+          <!-- Ignora metadati XMP -->
+          <label class="setting-row">
+            <span class="setting-text">
+              <span class="setting-title">Ignora metadati XMP</span>
+              <span class="setting-desc">ignoreGPanoXMP (consigliato in test)</span>
+            </span>
+            <span class="switch">
+              <input type="checkbox" id="opt-ignore-xmp" checked>
+              <span class="switch-slider"></span>
+            </span>
+          </label>
+
+          <!-- Bussola -->
+          <label class="setting-row">
+            <span class="setting-text">
+              <span class="setting-title">Mostra bussola</span>
+              <span class="setting-desc">Indicatore di orientamento</span>
+            </span>
+            <span class="switch">
+              <input type="checkbox" id="opt-compass" checked>
+              <span class="switch-slider"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Pulsante Reset Vista -->
+      <button type="button" class="btn btn-secondary btn-sm btn-full" id="btn-reset-view">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"></polyline>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg>
+        Reset vista
+      </button>
+    </div>
+  </aside>
+
+  <!-- Notifica Toast -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // Stato applicativo
+      const state = {
+        viewer: null,
+        currentObjectUrl: null,
+        hasImage: false,
+        autoRotate: false,
+        autoRotateSpeed: -2,
+        ignoreGPanoXMP: true,
+        compass: true,
+        rafId: null,
+        lastYawStr: '',
+        lastPitchStr: '',
+        lastHfovStr: '',
+        dragCounter: 0,
+        toastTimer: null
+      };
+
+      // Riferimenti DOM
+      const dom = {
+        fileInput: document.getElementById('file-input'),
+        landingScreen: document.getElementById('landing-screen'),
+        landingDropzone: document.getElementById('landing-dropzone'),
+        landingSelectBtn: document.getElementById('landing-select-btn'),
+        dropOverlay: document.getElementById('drop-overlay'),
+        controlPanel: document.getElementById('control-panel'),
+        panelToggleOpen: document.getElementById('panel-toggle-open'),
+        panelToggleClose: document.getElementById('panel-toggle-close'),
+        panelSelectBtn: document.getElementById('panel-select-btn'),
+        infoFilename: document.getElementById('info-filename'),
+        infoResolution: document.getElementById('info-resolution'),
+        infoRatio: document.getElementById('info-ratio'),
+        ratioWarning: document.getElementById('ratio-warning'),
+        valYaw: document.getElementById('val-yaw'),
+        valPitch: document.getElementById('val-pitch'),
+        valHfov: document.getElementById('val-hfov'),
+        btnCopyJson: document.getElementById('btn-copy-json'),
+        optAutorotate: document.getElementById('opt-autorotate'),
+        optAutorotateSpeed: document.getElementById('opt-autorotate-speed'),
+        optSpeedVal: document.getElementById('opt-speed-val'),
+        autorotateSpeedWrap: document.getElementById('autorotate-speed-wrap'),
+        optIgnoreXmp: document.getElementById('opt-ignore-xmp'),
+        optCompass: document.getElementById('opt-compass'),
+        btnResetView: document.getElementById('btn-reset-view'),
+        toast: document.getElementById('toast')
+      };
+
+      /**
+       * Mostra una notifica toast temporanea non invasiva.
+       */
+      function showToast(message, type = 'info') {
+        clearTimeout(state.toastTimer);
+        dom.toast.textContent = message;
+        dom.toast.className = '';
+        if (type === 'success') dom.toast.classList.add('toast-success');
+        if (type === 'error') dom.toast.classList.add('toast-error');
+        // Forza reflow per riavviare la transizione se necessario
+        void dom.toast.offsetWidth;
+        dom.toast.classList.add('show');
+
+        state.toastTimer = setTimeout(() => {
+          dom.toast.classList.remove('show');
+        }, 2800);
+      }
+
+      /**
+       * Verifica che la libreria Pannellum sia stata caricata correttamente.
+       */
+      function isPannellumReady() {
+        return typeof window.pannellum !== 'undefined' && typeof window.pannellum.viewer === 'function';
+      }
+
+      /**
+       * Distrugge in sicurezza l'istanza corrente di Pannellum e ferma il loop di telemetria.
+       */
+      function destroyViewer() {
+        if (state.rafId !== null) {
+          cancelAnimationFrame(state.rafId);
+          state.rafId = null;
+        }
+        if (state.viewer) {
+          try {
+            state.viewer.destroy();
+          } catch (err) {
+            console.warn('Errore durante viewer.destroy():', err);
+          }
+          state.viewer = null;
+        }
+      }
+
+      /**
+       * Avvia il loop di aggiornamento in tempo reale per Yaw, Pitch e HFOV.
+       */
+      function startTelemetryLoop() {
+        function update() {
+          if (state.viewer) {
+            try {
+              const yaw = state.viewer.getYaw();
+              const pitch = state.viewer.getPitch();
+              const hfov = state.viewer.getHfov();
+
+              if (Number.isFinite(yaw) && Number.isFinite(pitch) && Number.isFinite(hfov)) {
+                const yawStr = yaw.toFixed(1) + '°';
+                const pitchStr = pitch.toFixed(1) + '°';
+                const hfovStr = hfov.toFixed(1) + '°';
+
+                if (yawStr !== state.lastYawStr) {
+                  dom.valYaw.textContent = yawStr;
+                  state.lastYawStr = yawStr;
+                }
+                if (pitchStr !== state.lastPitchStr) {
+                  dom.valPitch.textContent = pitchStr;
+                  state.lastPitchStr = pitchStr;
+                }
+                if (hfovStr !== state.lastHfovStr) {
+                  dom.valHfov.textContent = hfovStr;
+                  state.lastHfovStr = hfovStr;
+                }
+              }
+            } catch (_) {
+              // Ignora letture transitorie durante il ricaricamento
+            }
+          }
+          state.rafId = requestAnimationFrame(update);
+        }
+
+        if (state.rafId !== null) {
+          cancelAnimationFrame(state.rafId);
+        }
+        state.rafId = requestAnimationFrame(update);
+      }
+
+      /**
+       * Inizializza (o re-inizializza) il viewer Pannellum con lo stato corrente.
+       * @param {Object} [preserveView] - Coordinate opzionali { yaw, pitch, hfov } da mantenere.
+       */
+      function initViewer(preserveView) {
+        if (!state.currentObjectUrl) return;
+
+        if (!isPannellumReady()) {
+          showToast('Errore: impossibile caricare Pannellum. Verifica la connessione internet.', 'error');
+          return;
+        }
+
+        // Salva vista corrente se richiesta e se esiste già un viewer
+        let initialYaw = 0;
+        let initialPitch = 0;
+        let initialHfov = 100;
+
+        if (preserveView && state.viewer) {
+          try {
+            initialYaw = state.viewer.getYaw();
+            initialPitch = state.viewer.getPitch();
+            initialHfov = state.viewer.getHfov();
+          } catch (_) {
+            // Usa valori predefiniti
+          }
+        }
+
+        // Distrugge sempre la vecchia istanza prima di crearne una nuova
+        destroyViewer();
+
+        try {
+          state.viewer = window.pannellum.viewer('panorama', {
+            type: 'equirectangular',
+            panorama: state.currentObjectUrl,
+            autoLoad: true,
+            showControls: true,
+            compass: state.compass,
+            ignoreGPanoXMP: state.ignoreGPanoXMP,
+            autoRotate: state.autoRotate ? state.autoRotateSpeed : 0,
+            yaw: initialYaw,
+            pitch: initialPitch,
+            hfov: initialHfov
+          });
+
+          state.viewer.on('error', function (errMsg) {
+            showToast('Errore Pannellum: ' + errMsg, 'error');
+          });
+
+          startTelemetryLoop();
+        } catch (err) {
+          console.error('Errore inizializzazione Pannellum:', err);
+          showToast('Impossibile inizializzare il visualizzatore 360°.', 'error');
+        }
+      }
+
+      /**
+       * Aggiorna i metadati visivi del file (nome, risoluzione e badge aspect ratio).
+       */
+      function updateFileBadges(file, width, height) {
+        dom.infoFilename.textContent = file.name;
+        dom.infoFilename.title = file.name;
+        dom.infoResolution.textContent = `${width} × ${height}`;
+
+        const ratio = width / height;
+        const ratioFormatted = ratio.toFixed(2) + ':1';
+        // Tolleranza ±0.05 intorno al rapporto 2.00:1 standard equirettangolare
+        const isEquirectangularRatio = Math.abs(ratio - 2.0) <= 0.05;
+
+        dom.infoRatio.classList.remove('badge-success', 'badge-warn');
+        if (isEquirectangularRatio) {
+          dom.infoRatio.classList.add('badge-success');
+          dom.infoRatio.textContent = `${ratioFormatted} · 2:1 OK`;
+          dom.ratioWarning.classList.remove('visible');
+        } else {
+          dom.infoRatio.classList.add('badge-warn');
+          dom.infoRatio.textContent = `${ratioFormatted} · Non 2:1`;
+          dom.ratioWarning.classList.add('visible');
+        }
+      }
+
+      /**
+       * Gestisce il caricamento di un file immagine locale tramite URL.createObjectURL().
+       */
+      function handleImageFile(file) {
+        if (!file) return;
+
+        // Controllo base sul tipo di file
+        const isImageMime = file.type && file.type.startsWith('image/');
+        const isImageExt = /\.(jpe?g|png|webp|bmp|gif|avif)$/i.test(file.name);
+        if (!isImageMime && !isImageExt) {
+          showToast('Seleziona un file immagine valido (JPG, PNG, WebP...).', 'error');
+          return;
+        }
+
+        const newUrl = URL.createObjectURL(file);
+        const probeImg = new Image();
+
+        probeImg.onload = function () {
+          const width = probeImg.naturalWidth;
+          const height = probeImg.naturalHeight;
+
+          // Revoca il precedente Blob URL per evitare memory leak
+          if (state.currentObjectUrl) {
+            URL.revokeObjectURL(state.currentObjectUrl);
+          }
+          state.currentObjectUrl = newUrl;
+          state.hasImage = true;
+
+          // Aggiorna UI
+          updateFileBadges(file, width, height);
+          dom.landingScreen.classList.add('hidden');
+          dom.controlPanel.classList.add('visible');
+          dom.controlPanel.classList.remove('collapsed');
+          dom.panelToggleOpen.classList.remove('visible');
+
+          // Inizializza Pannellum (nuova foto: vista iniziale resettata)
+          initViewer(false);
+          showToast(`Immagine caricata (${width}×${height})`, 'success');
+        };
+
+        probeImg.onerror = function () {
+          URL.revokeObjectURL(newUrl);
+          showToast('Impossibile leggere questa immagine. File danneggiato o formato non supportato.', 'error');
+        };
+
+        probeImg.src = newUrl;
+      }
+
+      /**
+       * Copia un testo negli appunti con fallback compatibile anche con file:// e iframe.
+       */
+      function copyTextToClipboard(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          return navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+        }
+        return Promise.resolve(fallbackCopy(text));
+      }
+
+      function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        let ok = false;
+        try {
+          ok = document.execCommand('copy');
+        } catch (err) {
+          console.error('Fallback copy fallito:', err);
+        }
+        document.body.removeChild(textarea);
+        if (!ok) throw new Error('Copia non riuscita');
+      }
+
+      /* =====================================================================
+       * Event Listeners: Selezione file e Drag & Drop sull'intera pagina
+       * ===================================================================== */
+
+      function triggerFilePicker() {
+        dom.fileInput.value = '';
+        dom.fileInput.click();
+      }
+
+      dom.landingSelectBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        triggerFilePicker();
+      });
+
+      dom.landingDropzone.addEventListener('click', triggerFilePicker);
+      dom.landingDropzone.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          triggerFilePicker();
+        }
+      });
+
+      dom.panelSelectBtn.addEventListener('click', triggerFilePicker);
+
+      dom.fileInput.addEventListener('change', function (e) {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          handleImageFile(file);
+        }
+      });
+
+      // Drag & Drop globale su tutta la finestra
+      window.addEventListener('dragenter', function (e) {
+        e.preventDefault();
+        state.dragCounter++;
+        dom.dropOverlay.classList.add('active');
+      });
+
+      window.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        if (e.dataTransfer) {
+          e.dataTransfer.dropEffect = 'copy';
+        }
+      });
+
+      window.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        state.dragCounter = Math.max(0, state.dragCounter - 1);
+        if (state.dragCounter === 0) {
+          dom.dropOverlay.classList.remove('active');
+        }
+      });
+
+      window.addEventListener('drop', function (e) {
+        e.preventDefault();
+        state.dragCounter = 0;
+        dom.dropOverlay.classList.remove('active');
+
+        const files = e.dataTransfer && e.dataTransfer.files;
+        if (files && files.length > 0) {
+          handleImageFile(files[0]);
+        }
+      });
+
+      /* =====================================================================
+       * Event Listeners: Pannello di controllo e opzioni Pannellum
+       * ===================================================================== */
+
+      // Apri / Chiudi pannello
+      dom.panelToggleClose.addEventListener('click', function () {
+        dom.controlPanel.classList.add('collapsed');
+        dom.panelToggleOpen.classList.add('visible');
+      });
+
+      dom.panelToggleOpen.addEventListener('click', function () {
+        dom.controlPanel.classList.remove('collapsed');
+        dom.panelToggleOpen.classList.remove('visible');
+      });
+
+      // Copia coordinate JSON
+      dom.btnCopyJson.addEventListener('click', function () {
+        if (!state.viewer) return;
+        const payload = {
+          yaw: Number(state.viewer.getYaw().toFixed(2)),
+          pitch: Number(state.viewer.getPitch().toFixed(2)),
+          hfov: Number(state.viewer.getHfov().toFixed(2))
+        };
+        const jsonString = JSON.stringify(payload, null, 2);
+
+        copyTextToClipboard(jsonString)
+          .then(() => showToast('Coordinate vista copiate in JSON!', 'success'))
+          .catch(() => showToast('Impossibile copiare negli appunti.', 'error'));
+      });
+
+      // Auto-rotazione checkbox
+      dom.optAutorotate.addEventListener('change', function () {
+        state.autoRotate = dom.optAutorotate.checked;
+        dom.autorotateSpeedWrap.classList.toggle('disabled', !state.autoRotate);
+
+        if (state.viewer) {
+          if (state.autoRotate) {
+            state.viewer.startAutoRotate(state.autoRotateSpeed);
+          } else {
+            state.viewer.stopAutoRotate();
+          }
+        }
+      });
+
+      // Slider velocità auto-rotazione
+      dom.optAutorotateSpeed.addEventListener('input', function () {
+        state.autoRotateSpeed = parseFloat(dom.optAutorotateSpeed.value);
+        dom.optSpeedVal.textContent = `${state.autoRotateSpeed.toFixed(1)} °/s`;
+
+        if (state.viewer && state.autoRotate) {
+          state.viewer.startAutoRotate(state.autoRotateSpeed);
+        }
+      });
+
+      // Ignora metadati XMP (richiede riavvio del viewer)
+      dom.optIgnoreXmp.addEventListener('change', function () {
+        state.ignoreGPanoXMP = dom.optIgnoreXmp.checked;
+        if (state.hasImage) {
+          initViewer(true);
+        }
+      });
+
+      // Mostra bussola (richiede riavvio del viewer)
+      dom.optCompass.addEventListener('change', function () {
+        state.compass = dom.optCompass.checked;
+        if (state.hasImage) {
+          initViewer(true);
+        }
+      });
+
+      // Reset vista (pitch=0, yaw=0, hfov=100)
+      dom.btnResetView.addEventListener('click', function () {
+        if (state.viewer) {
+          state.viewer.lookAt(0, 0, 100, 500);
+        }
+      });
+
+      // Pulizia risorse alla chiusura della pagina
+      window.addEventListener('beforeunload', function () {
+        destroyViewer();
+        if (state.currentObjectUrl) {
+          URL.revokeObjectURL(state.currentObjectUrl);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
