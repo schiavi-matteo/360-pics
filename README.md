@@ -23,3 +23,6 @@ Panoramas can be viewed:
     sandbox="">
 </iframe>
 ```
+
+## Test your 360° pictures
+If you need to check how your 360° pictures behave, you can use this [Local Viewer](https://schiavi-matteo.github.io/360-pics/local-test-viewer.html) to try out the pics locally before uploading them.
